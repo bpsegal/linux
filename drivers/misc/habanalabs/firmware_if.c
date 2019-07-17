@@ -56,11 +56,19 @@ int hl_fw_push_fw_to_device(struct hl_device *hdev, const char *fw_name,
 			usleep_range(20, 100);
 		}
 
-		writeq(*fw_data, dst);
+		/* The firmware is already in LE format.  As such, we don't want to perform any byte-swapping that 
+		 * might be done by the writeX macros. Instead, we can use the "raw" versions of these macros so the 
+		 * host system won't perform any byte-swapping and will write the data as-is.
+		 *
+		 * As an aside, it's unclear (to me) why the memcpy_toio function was not used for this. memcpy_toio
+		 * will copy "N" bytes to the I/O memory space without any byte-swapping/alteration to the memory, and
+		 * is typically the method used for copying firmware to a PCI-e adapter.
+		 */
+		__raw_writeq(*fw_data, dst);
 	}
 
 	if ((fw->size % 8) != 0)
-		writel(*(const u32 *) fw_data, dst);
+		__raw_writel(*(const u32 *) fw_data, dst);
 
 out:
 	release_firmware(fw);
