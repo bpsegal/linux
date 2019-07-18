@@ -1132,6 +1132,10 @@ void hl_device_fini(struct hl_device *hdev)
  * @addr: Address to poll
  * @timeout_us: timeout in us
  * @val: Variable to read the value into
+ * @mem_written_by_device: if true, the host memory being polled will be 
+ *                         updated directly by the device. If false, the
+ *                         host memory being pilled will be updated by host 
+ *                         CPU.
  *
  * Returns 0 on success and -ETIMEDOUT upon a timeout. In either
  * case, the last read value at @addr is stored in @val. Must not
@@ -1141,7 +1145,7 @@ void hl_device_fini(struct hl_device *hdev)
  * timeout_us
  */
 int hl_poll_timeout_memory(struct hl_device *hdev, u64 addr,
-				u32 timeout_us, u32 *val)
+				u32 timeout_us, u32 *val, bool mem_written_by_device)
 {
 	/*
 	 * address in this function points always to a memory location in the
@@ -1175,6 +1179,12 @@ int hl_poll_timeout_memory(struct hl_device *hdev, u64 addr,
 		usleep_range((100 >> 2) + 1, 100);
 	}
 
+	/* If the device wrote to this memory, it will be in LE format. Make sure to
+	 * handle any needed endianess conversion for the host platform reading this value.
+	 */
+	if (mem_written_by_device) {
+		*val=le32_to_cpu(*val);
+	}
 	return *val ? 0 : -ETIMEDOUT;
 }
 

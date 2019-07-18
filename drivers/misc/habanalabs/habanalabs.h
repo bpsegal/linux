@@ -1329,7 +1329,7 @@ int create_hdev(struct hl_device **dev, struct pci_dev *pdev,
 		enum hl_asic_type asic_type, int minor);
 void destroy_hdev(struct hl_device *hdev);
 int hl_poll_timeout_memory(struct hl_device *hdev, u64 addr, u32 timeout_us,
-				u32 *val);
+				u32 *val, bool mem_written_by_device);
 int hl_poll_timeout_device_memory(struct hl_device *hdev, void __iomem *addr,
 				u32 timeout_us, u32 *val);
 int hl_hw_queues_create(struct hl_device *hdev);
