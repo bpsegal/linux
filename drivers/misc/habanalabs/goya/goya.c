@@ -2861,7 +2861,7 @@ static int goya_send_job_on_qman0(struct hl_device *hdev, struct hl_cs_job *job)
 	}
 
 	rc = hl_poll_timeout_memory(hdev, (u64) (uintptr_t) fence_ptr, timeout,
-					&tmp);
+					&tmp, true);
 
 	hl_hw_queue_inc_ci_kernel(hdev, GOYA_QUEUE_ID_DMA_0);
 
@@ -2942,7 +2942,7 @@ int goya_test_queue(struct hl_device *hdev, u32 hw_queue_id)
 	}
 
 	rc = hl_poll_timeout_memory(hdev, (u64) (uintptr_t) fence_ptr,
-					GOYA_TEST_QUEUE_WAIT_USEC, &tmp);
+					GOYA_TEST_QUEUE_WAIT_USEC, &tmp, true);
 
 	hl_hw_queue_inc_ci_kernel(hdev, hw_queue_id);
 
