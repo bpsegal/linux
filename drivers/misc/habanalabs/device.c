@@ -1134,8 +1134,10 @@ void hl_device_fini(struct hl_device *hdev)
  * @val: Variable to read the value into
  * @mem_written_by_device: if true, the host memory being polled will be 
  *                         updated directly by the device. If false, the
- *                         host memory being pilled will be updated by host 
- *                         CPU.
+ *                         host memory being polled will be updated by host 
+ *                         CPU. Required so host knows whether or not
+ *                         the memory might need to be byte-swapped before
+ *                         returning value to caller.
  *
  * Returns 0 on success and -ETIMEDOUT upon a timeout. In either
  * case, the last read value at @addr is stored in @val. Must not
