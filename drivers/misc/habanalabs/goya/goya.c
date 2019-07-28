@@ -6,6 +6,7 @@
  */
 
 #include "goyaP.h"
+//#include "debug.h"
 #include "include/hw_ip/mmu/mmu_general.h"
 #include "include/hw_ip/mmu/mmu_v1_0.h"
 #include "include/goya/asic_reg/goya_masks.h"
@@ -3430,7 +3431,7 @@ static int goya_validate_cb(struct hl_device *hdev,
 		user_pkt = (void *) (uintptr_t)
 			(parser->user_cb->kernel_address + cb_parsed_length);
 
-		pkt_id = (enum packet_id) (((*(u64 *) user_pkt) &
+		pkt_id = (enum packet_id) ((le64_to_cpu((*(__le64 *) user_pkt)) &
 				PACKET_HEADER_PACKET_ID_MASK) >>
 					PACKET_HEADER_PACKET_ID_SHIFT);
 
@@ -3662,7 +3663,7 @@ static int goya_patch_cb(struct hl_device *hdev,
 			(parser->patched_cb->kernel_address +
 					cb_patched_cur_length);
 
-		pkt_id = (enum packet_id) (((*(u64 *) user_pkt) &
+		pkt_id = (enum packet_id) ((le64_to_cpu((*(__le64 *) user_pkt)) &
 				PACKET_HEADER_PACKET_ID_MASK) >>
 					PACKET_HEADER_PACKET_ID_SHIFT);
 
