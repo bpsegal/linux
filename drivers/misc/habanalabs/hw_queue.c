@@ -6,6 +6,7 @@
  */
 
 #include "habanalabs.h"
+#include "debug.h"
 
 #include <linux/slab.h>
 
@@ -269,6 +270,9 @@ static void ext_hw_queue_schedule_job(struct hl_cs_job *job)
 						cq_addr,
 						__le32_to_cpu(cq_pkt.data),
 						q->hw_queue_id);
+
+	/* Dump the packets and have a look... */
+	dumpMemory("Packets to submit to H/W", (void*) cb->kernel_address, len);
 
 	q->shadow_queue[hl_pi_2_offset(q->pi)] = job;
 
