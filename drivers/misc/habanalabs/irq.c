@@ -60,6 +60,7 @@ static void irq_handle_eqe(struct work_struct *work)
 							eq_work);
 	struct hl_device *hdev = eqe_work->hdev;
 
+        printk(KERN_DEBUG "DEBUG: Enter %s %d \n",__FUNCTION__,__LINE__);
 	hdev->asic_funcs->handle_eqe(hdev, &eqe_work->eq_entry);
 
 	kfree(eqe_work);
@@ -80,9 +81,10 @@ irqreturn_t hl_irq_handler_cq(int irq, void *arg)
 	struct hl_cs_job *job;
 	bool shadow_index_valid;
 	u16 shadow_index;
-	u32 *cq_entry;
-	u32 *cq_base;
+	struct hl_cq_entry *cq_entry, *cq_base;
+	struct hl_cq_entry tmp_cqe;
 
+        printk(KERN_DEBUG "DEBUG: Enter %s %d \n",__FUNCTION__,__LINE__);
 	if (hdev->disabled) {
 		dev_dbg(hdev->dev,
 			"Device disabled but received IRQ %d for CQ %d\n",
@@ -90,16 +92,16 @@ irqreturn_t hl_irq_handler_cq(int irq, void *arg)
 		return IRQ_HANDLED;
 	}
 
-	cq_base = (u32 *) (uintptr_t) cq->kernel_address;
+	cq_base = (struct hl_cq_entry *) (uintptr_t) cq->kernel_address;
 
 	while (1) {
-		bool entry_ready = ((cq_base[cq->ci] & CQ_ENTRY_READY_MASK)
+		bool entry_ready = ((le32_to_cpu(cq_base[cq->ci].data) & CQ_ENTRY_READY_MASK)
 						>> CQ_ENTRY_READY_SHIFT);
 
 		if (!entry_ready)
 			break;
 
-		cq_entry = (u32 *) &cq_base[cq->ci];
+		cq_entry = (struct hl_cq_entry *) &cq_base[cq->ci];
 
 		/*
 		 * Make sure we read CQ entry contents after we've
@@ -108,17 +110,18 @@ irqreturn_t hl_irq_handler_cq(int irq, void *arg)
 		dma_rmb();
 
 		shadow_index_valid =
-			((*cq_entry & CQ_ENTRY_SHADOW_INDEX_VALID_MASK)
+			((le32_to_cpu(cq_entry->data) & CQ_ENTRY_SHADOW_INDEX_VALID_MASK)
 					>> CQ_ENTRY_SHADOW_INDEX_VALID_SHIFT);
 
 		shadow_index = (u16)
-			((*cq_entry & CQ_ENTRY_SHADOW_INDEX_MASK)
+			((le32_to_cpu(cq_entry->data) & CQ_ENTRY_SHADOW_INDEX_MASK)
 					>> CQ_ENTRY_SHADOW_INDEX_SHIFT);
 
 		queue = &hdev->kernel_queues[cq->hw_queue_id];
 
 		if ((shadow_index_valid) && (!hdev->disabled)) {
 			job = queue->shadow_queue[hl_pi_2_offset(shadow_index)];
+			printk(KERN_DEBUG "DEBUG: Enter %s %d \n",__FUNCTION__,__LINE__);
 			queue_work(hdev->cq_wq, &job->finish_work);
 		}
 
@@ -131,7 +134,10 @@ irqreturn_t hl_irq_handler_cq(int irq, void *arg)
 		queue->ci = hl_queue_inc_ptr(queue->ci);
 
 		/* Clear CQ entry ready bit */
-		cq_base[cq->ci] &= ~CQ_ENTRY_READY_MASK;
+		tmp_cqe = (const struct hl_cq_entry){ 0 };
+		tmp_cqe.data = le32_to_cpu(cq_entry->data);
+		tmp_cqe.data &= ~CQ_ENTRY_READY_MASK;
+		cq_entry->data = cpu_to_le32(tmp_cqe.data);
 
 		cq->ci = hl_cq_inc_ptr(cq->ci);
 
@@ -157,6 +163,7 @@ irqreturn_t hl_irq_handler_eq(int irq, void *arg)
 	struct hl_eq_entry *eq_base;
 	struct hl_eqe_work *handle_eqe_work;
 
+        printk(KERN_DEBUG "DEBUG: Enter %s %d \n",__FUNCTION__,__LINE__);
 	eq_base = (struct hl_eq_entry *) (uintptr_t) eq->kernel_address;
 
 	while (1) {
