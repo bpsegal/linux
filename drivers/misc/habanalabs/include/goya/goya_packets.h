@@ -13,6 +13,18 @@
 #define PACKET_HEADER_PACKET_ID_SHIFT		56
 #define PACKET_HEADER_PACKET_ID_MASK		0x1F00000000000000ull
 
+/* All packets have, at least, an 8-byte header, which contains
+ * the packet type.  The kernel driver uses the packet header for packet
+ * validation and to perform any necessary required preparation before
+ * sending off to the hardware.
+ */
+typedef struct {
+	__le64 packet_header;
+	// The rest of the packet data follows. Use the corresponding packet_XXX struct
+	// to deference the data, based on packet type.
+	unsigned char packet_contents[0];
+	} packet_t;
+
 enum packet_id {
 	PACKET_WREG_32 = 0x1,
 	PACKET_WREG_BULK = 0x2,
