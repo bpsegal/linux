@@ -60,7 +60,6 @@ static void irq_handle_eqe(struct work_struct *work)
 							eq_work);
 	struct hl_device *hdev = eqe_work->hdev;
 
-        printk(KERN_DEBUG "DEBUG: Enter %s %d \n",__FUNCTION__,__LINE__);
 	hdev->asic_funcs->handle_eqe(hdev, &eqe_work->eq_entry);
 
 	kfree(eqe_work);
@@ -84,7 +83,6 @@ irqreturn_t hl_irq_handler_cq(int irq, void *arg)
 	struct hl_cq_entry *cq_entry, *cq_base;
 	struct hl_cq_entry tmp_cqe;
 
-        printk(KERN_DEBUG "DEBUG: Enter %s %d \n",__FUNCTION__,__LINE__);
 	if (hdev->disabled) {
 		dev_dbg(hdev->dev,
 			"Device disabled but received IRQ %d for CQ %d\n",
@@ -121,7 +119,6 @@ irqreturn_t hl_irq_handler_cq(int irq, void *arg)
 
 		if ((shadow_index_valid) && (!hdev->disabled)) {
 			job = queue->shadow_queue[hl_pi_2_offset(shadow_index)];
-			printk(KERN_DEBUG "DEBUG: Enter %s %d \n",__FUNCTION__,__LINE__);
 			queue_work(hdev->cq_wq, &job->finish_work);
 		}
 
@@ -163,7 +160,6 @@ irqreturn_t hl_irq_handler_eq(int irq, void *arg)
 	struct hl_eq_entry *eq_base;
 	struct hl_eqe_work *handle_eqe_work;
 
-        printk(KERN_DEBUG "DEBUG: Enter %s %d \n",__FUNCTION__,__LINE__);
 	eq_base = (struct hl_eq_entry *) (uintptr_t) eq->kernel_address;
 
 	while (1) {

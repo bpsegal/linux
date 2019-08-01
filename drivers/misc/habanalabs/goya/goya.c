@@ -6,7 +6,6 @@
  */
 
 #include "goyaP.h"
-//#include "debug.h"
 #include "include/hw_ip/mmu/mmu_general.h"
 #include "include/hw_ip/mmu/mmu_v1_0.h"
 #include "include/goya/asic_reg/goya_masks.h"
