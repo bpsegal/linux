@@ -81,7 +81,6 @@ irqreturn_t hl_irq_handler_cq(int irq, void *arg)
 	bool shadow_index_valid;
 	u16 shadow_index;
 	struct hl_cq_entry *cq_entry, *cq_base;
-	struct hl_cq_entry tmp_cqe;
 
 	if (hdev->disabled) {
 		dev_dbg(hdev->dev,
@@ -131,10 +130,7 @@ irqreturn_t hl_irq_handler_cq(int irq, void *arg)
 		queue->ci = hl_queue_inc_ptr(queue->ci);
 
 		/* Clear CQ entry ready bit */
-		tmp_cqe = (const struct hl_cq_entry){ 0 };
-		tmp_cqe.data = le32_to_cpu(cq_entry->data);
-		tmp_cqe.data &= ~CQ_ENTRY_READY_MASK;
-		cq_entry->data = cpu_to_le32(tmp_cqe.data);
+		cq_entry->data = cpu_to_le32(le32_to_cpu(cq_entry->data) & ~CQ_ENTRY_READY_MASK);
 
 		cq->ci = hl_cq_inc_ptr(cq->ci);
 
